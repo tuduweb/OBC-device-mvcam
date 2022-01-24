@@ -34,10 +34,13 @@ include(./mvcamsdk/mvcamsdk.cmake)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
+file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
+
 set(PROJECT_SOURCES
         #resources.qrc
         src/main.cpp
         ${HEADERS}
+        ${SRC_FILES}
 )
 
 add_executable(${PROJECT_NAME}
@@ -45,7 +48,6 @@ add_executable(${PROJECT_NAME}
 )
 
 add_library(obc_baselib STATIC
-
 )
 
 if(APPLE)

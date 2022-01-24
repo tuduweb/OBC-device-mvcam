@@ -1,0 +1,195 @@
+#include "MVCAMStream.hpp"
+
+#include <QThread>
+#include <QImage>
+
+unsigned char* g_pRgbBuffer = NULL;     //处理后数据缓存区
+BYTE* g_readBuf = NULL;    //画板显示数据区
+Width_Height            g_W_H_INFO;         //显示画板到大小和图像大小
+int                     g_hCamera = -1;     //设备句柄
+
+
+MVCAMStream::MVCAMStream() : thread(new QThread) {
+    qDebug() << QThread::currentThread();
+    moveToThread(thread);
+    qDebug() << QThread::currentThread();
+}
+
+#include <QTimer>
+
+int MVCAMStream::StreamInit() {
+    
+
+	int                     iCameraCounts = 4;
+	int                     iStatus = -1;
+	tSdkCameraDevInfo       tCameraEnumList[4];
+
+    tSdkCameraCapbility     g_tCapability;      //设备描述信息
+
+
+
+    iStatus = CameraSdkInit(1);
+
+    //枚举设备，并建立设备列表
+	CameraEnumerateDevice(tCameraEnumList, &iCameraCounts);
+
+    //没有连接设备
+	if (iCameraCounts == 0) {
+		return -1;
+	}
+
+    //choose which one to init
+	//相机初始化。初始化成功后，才能调用任何其他相机相关的操作接口
+	iStatus = CameraInit(&tCameraEnumList[0], -1, -1, &g_hCamera);
+	//初始化失败
+	if (iStatus != CAMERA_STATUS_SUCCESS) {
+		return -1;
+	}
+    //获得相机的特性描述结构体。该结构体中包含了相机可设置的各种参数的范围信息。决定了相关函数的参数
+	CameraGetCapability(g_hCamera, &g_tCapability);
+
+    //alloc memorys : maybe can use other methods
+    g_pRgbBuffer = (unsigned char*)malloc(g_tCapability.sResolutionRange.iHeightMax * g_tCapability.sResolutionRange.iWidthMax * 3);
+	g_readBuf = (unsigned char*)malloc(g_tCapability.sResolutionRange.iHeightMax * g_tCapability.sResolutionRange.iWidthMax * 3);
+
+	/*让SDK进入工作模式，开始接收来自相机发送的图像
+		数据。如果当前相机是触发模式，则需要接收到
+		触发帧以后才会更新图像。    */
+	CameraPlay(g_hCamera);
+
+    /*
+		设置图像处理的输出格式，彩色黑白都支持RGB24位
+	*/
+	if (g_tCapability.sIspCapacity.bMonoSensor) {
+		CameraSetIspOutFormat(g_hCamera, CAMERA_MEDIA_TYPE_MONO8);
+	}
+	else {
+		CameraSetIspOutFormat(g_hCamera, CAMERA_MEDIA_TYPE_RGB8);
+	}
+
+	GUI_init_Resolution(g_hCamera, &g_tCapability);
+
+    //GUI_set_Resolution(hCamera, pCameraInfo);
+	tSdkImageResolution* pImageSizeDesc = g_tCapability.pImageSizeDesc;// 预设分辨率选择
+	tSdkImageResolution     sResolution;  //获取当前设置到分辨率
+
+	//获得当前预览的分辨率。
+	CameraGetImageResolution(g_hCamera, &sResolution);
+
+	g_W_H_INFO.sensor_width = pImageSizeDesc[sResolution.iIndex].iWidth;
+	g_W_H_INFO.sensor_height = pImageSizeDesc[sResolution.iIndex].iHeight;
+	g_W_H_INFO.buffer_size = g_W_H_INFO.sensor_width * g_W_H_INFO.sensor_height;
+
+
+
+    return 0;
+}
+
+void MVCAMStream::StartLoop() {
+    qDebug() << "startLoop";
+    loop(g_hCamera);
+}
+
+
+//分辨率的添加, 遍历
+int MVCAMStream::GUI_init_Resolution(int hCamera, tSdkCameraCapbility* pCameraInfo)
+{
+	int                     i = 0;
+	tSdkImageResolution* pImageSizeDesc = pCameraInfo->pImageSizeDesc;// 预设分辨率选择
+	int                     iImageSizeDesc = pCameraInfo->iImageSizeDesc; // 预设分辨率的个数，即pImageSizeDesc数组的大小
+
+	_resolutionLists.clear();
+
+	for (i = 0; i < iImageSizeDesc; i++) {
+		//ui->res_combobox->addItem(QString::fromLocal8Bit(pImageSizeDesc[i].acDescription));
+		_resolutionLists.append(QString::fromLocal8Bit(pImageSizeDesc[i].acDescription));
+	}
+
+	return 0;
+}
+
+
+int MVCAMStream::StreamStart() {
+    start();
+    return 0;
+}
+
+void MVCAMStream::run() {
+    loop(g_hCamera);
+    exec();
+}
+
+const QStringList MVCAMStream::GetStreamLists() {
+    QStringList lists;
+    int                     iCameraCounts = 4;
+	int                     iStatus = -1;
+	tSdkCameraDevInfo       tCameraEnumList[4];
+
+	//sdk初始化  0 English 1中文 // move to initalize
+	CameraSdkInit(1);
+
+	//枚举设备，并建立设备列表
+	CameraEnumerateDevice(tCameraEnumList, &iCameraCounts);
+
+	if (iCameraCounts <= 0)
+		return {};
+
+	for (int i = 0; i < iCameraCounts; ++i) {
+		lists.append(
+			QString("%1@@%2@@%3").arg(tCameraEnumList[i].acProductName)
+			.arg(tCameraEnumList[i].acDriverVersion)
+			.arg(tCameraEnumList[i].acSn)
+		);
+	}
+
+	return lists;
+}
+
+int MVCAMStream::loop(int g_hCamera) {
+    bool pause_status = false;
+    bool quit_status = false;
+
+    //int                     g_hCamera = -1;     //设备句柄
+	tSdkFrameHead           g_tFrameHead;       //图像帧头信息
+	unsigned char*          g_pRawBuffer = NULL;     //raw数据
+
+
+    while(1) {
+
+        qDebug() << "mvcam thread : " << QThread::currentThread();
+        if(!pause_status) {
+
+            if(quit_status) break;
+
+			if (CameraGetImageBuffer(g_hCamera, &g_tFrameHead, &g_pRawBuffer, 2000) == CAMERA_STATUS_SUCCESS)
+			{
+
+                CameraImageProcess(g_hCamera, g_pRawBuffer, g_pRgbBuffer, &g_tFrameHead);
+				CameraReleaseImageBuffer(g_hCamera, g_pRawBuffer);
+
+                if (g_tFrameHead.uiMediaType == CAMERA_MEDIA_TYPE_MONO8) {
+                    //
+                } else {
+                    memcpy(g_readBuf, g_pRgbBuffer, g_W_H_INFO.buffer_size * 3);
+                    if (quit_status) break;
+
+                    QImage img = QImage((const uchar*)g_readBuf, g_W_H_INFO.sensor_width, g_W_H_INFO.sensor_height, QImage::Format_RGB888);
+                    emit FrameReceived(img);
+                }
+
+            } else {
+                
+                printf("timeout \n");
+				QThread::usleep(1000);
+            
+            }
+
+        } else {
+            QThread::usleep(1000);
+        }
+        if(quit_status) break;
+    }
+
+    return 0;
+
+}
