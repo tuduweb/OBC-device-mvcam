@@ -67,7 +67,7 @@ int MVCAMStream::StreamInit() {
 		CameraSetIspOutFormat(g_hCamera, CAMERA_MEDIA_TYPE_RGB8);
 	}
 
-	GUI_init_Resolution(g_hCamera, &g_tCapability);
+	camera_init_Resolution(g_hCamera, &g_tCapability);
 
     //GUI_set_Resolution(hCamera, pCameraInfo);
 	tSdkImageResolution* pImageSizeDesc = g_tCapability.pImageSizeDesc;// 预设分辨率选择
@@ -92,8 +92,7 @@ void MVCAMStream::StartLoop() {
 
 
 //分辨率的添加, 遍历
-int MVCAMStream::GUI_init_Resolution(int hCamera, tSdkCameraCapbility* pCameraInfo)
-{
+int MVCAMStream::camera_init_Resolution(int hCamera, tSdkCameraCapbility* pCameraInfo) {
 	int                     i = 0;
 	tSdkImageResolution* pImageSizeDesc = pCameraInfo->pImageSizeDesc;// 预设分辨率选择
 	int                     iImageSizeDesc = pCameraInfo->iImageSizeDesc; // 预设分辨率的个数，即pImageSizeDesc数组的大小
@@ -108,6 +107,63 @@ int MVCAMStream::GUI_init_Resolution(int hCamera, tSdkCameraCapbility* pCameraIn
 	return 0;
 }
 
+int MVCAMStream::camera_init_exposure(int hCamera, tSdkCameraCapbility* pCameraInfo) {
+
+	BOOL            AEstate = FALSE;
+	int             pbyAeTarget;
+	double          pfExposureTime;
+	int             pusAnalogGain;
+	BOOL            FlickEnable = FALSE;
+	int             piFrequencySel;
+	double	        m_fExpLineTime = 0;//当前的行曝光时间，单位为us
+	tSdkExpose* SdkExpose = &pCameraInfo->sExposeDesc;
+
+	//获得相机当前的曝光模式。
+	CameraGetAeState(hCamera, &AEstate);
+
+	//获得自动曝光的亮度目标值。
+	CameraGetAeTarget(hCamera, &pbyAeTarget);
+
+	//获得自动曝光时抗频闪功能的使能状态。
+	CameraGetAntiFlick(hCamera, &FlickEnable);
+
+	//获得相机的曝光时间。
+	CameraGetExposureTime(hCamera, &pfExposureTime);
+
+	//获得图像信号的模拟增益值。
+	CameraGetAnalogGain(hCamera, &pusAnalogGain);
+
+	//获得自动曝光时，消频闪的频率选择。
+	CameraGetLightFrequency(hCamera, &piFrequencySel);
+
+	/*
+		获得一行的曝光时间。对于CMOS传感器，其曝光
+		的单位是按照行来计算的，因此，曝光时间并不能在微秒
+		级别连续可调。而是会按照整行来取舍。这个函数的
+		作用就是返回CMOS相机曝光一行对应的时间。
+	*/
+	CameraGetExposureLineTime(hCamera, &m_fExpLineTime);
+
+    //整理参数为结果
+    //some codes
+    
+    
+    return 0;
+
+}
+
+int MVCAMStream::init_WB(int hCamera, tSdkCameraCapbility* pCameraInfo) {
+    
+    int RPos, GPos, BPos, Saturation;
+
+    CameraGetGain(hCamera, &RPos, &GPos, &BPos);
+	CameraGetSaturation(hCamera, &Saturation);
+    
+    //manage all param from above
+
+    return 0;
+
+}
 
 int MVCAMStream::StreamStart() {
     start();
@@ -146,8 +202,6 @@ const QStringList MVCAMStream::GetStreamLists() {
 }
 
 int MVCAMStream::loop(int g_hCamera) {
-    bool pause_status = false;
-    bool quit_status = false;
 
     //int                     g_hCamera = -1;     //设备句柄
 	tSdkFrameHead           g_tFrameHead;       //图像帧头信息

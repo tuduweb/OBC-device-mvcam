@@ -30,19 +30,32 @@ public:
 
     int loop(int hCamera);
 
+    int setPause() { pause_status = true; return 0; };
+    int setStart() { pause_status = false; return 0; };
+    int setStop() { quit_status = true; return 0; };
+
+
+
 protected:
     void run() override;
 
 public slots:
     void StartLoop();
 
-public:
-    int GUI_init_Resolution(int hCamera, tSdkCameraCapbility* pCameraInfo);
+protected:
+    int camera_init_Resolution(int hCamera, tSdkCameraCapbility* pCameraInfo);
+    int camera_init_exposure(int hCamera, tSdkCameraCapbility* pCameraInfo);
+    int camera_initWB(int hCamera, tSdkCameraCapbility* pCameraInfo);
+
     QStringList _resolutionLists;
 
+public:
     //Constraints relationship
     static const QStringList GetStreamLists();
     static const QJsonObject GetStreamTypes(){ return {}; };
 
-    QThread* thread;
+protected:
+    QThread* thread;// need a better way to manage stream threads
+    bool pause_status = false;
+    bool quit_status = false;
 };

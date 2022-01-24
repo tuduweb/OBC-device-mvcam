@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
     stream->StreamStart();
 
-    QTimer::singleShot(1000, stream, [=]{
+    QTimer::singleShot(1000, stream, [=](){
         qDebug() << "one shot";
     });
 
