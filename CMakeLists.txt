@@ -30,13 +30,14 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets WebSockets Network Li
 
 # include(./src/plugin/ObPluginInterface.cmake)
 
-# include(./cmake/include-ffmpeg.cmake)
+include(./mvcamsdk/mvcamsdk.cmake)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
 set(PROJECT_SOURCES
         #resources.qrc
         src/main.cpp
+        ${HEADERS}
 )
 
 add_executable(${PROJECT_NAME}
@@ -47,16 +48,28 @@ add_library(obc_baselib STATIC
 
 )
 
+if(APPLE)
+    add_custom_command(TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/" $<TARGET_FILE:${PROJECT_NAME}>)
+    
+    # change dependency
+    add_custom_command(TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @executable_path/../Frameworks/libmvsdk.dylib ${mvcamsdk_libs_DIR}/libmvsdk.dylib $<TARGET_FILE:${PROJECT_NAME}>)
+endif()
+
+message(${CMAKE_INSTALL_NAME_TOOL})
+
 target_link_libraries(obc_baselib
     PUBLIC Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
 )
 
-
-### add extra qt library
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE obc_baselib
+    PUBLIC obc_baselib
+    libmvsdk
 )
 
 
