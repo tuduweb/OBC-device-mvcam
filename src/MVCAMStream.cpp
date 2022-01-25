@@ -152,7 +152,7 @@ int MVCAMStream::camera_init_exposure(int hCamera, tSdkCameraCapbility* pCameraI
 
 }
 
-int MVCAMStream::init_WB(int hCamera, tSdkCameraCapbility* pCameraInfo) {
+int MVCAMStream::camera_init_WB(int hCamera, tSdkCameraCapbility* pCameraInfo) {
     
     int RPos, GPos, BPos, Saturation;
 

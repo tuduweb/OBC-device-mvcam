@@ -45,7 +45,7 @@ public slots:
 protected:
     int camera_init_Resolution(int hCamera, tSdkCameraCapbility* pCameraInfo);
     int camera_init_exposure(int hCamera, tSdkCameraCapbility* pCameraInfo);
-    int camera_initWB(int hCamera, tSdkCameraCapbility* pCameraInfo);
+    int camera_init_WB(int hCamera, tSdkCameraCapbility* pCameraInfo);
 
     QStringList _resolutionLists;
 

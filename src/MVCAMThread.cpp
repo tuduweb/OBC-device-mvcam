@@ -1,5 +1,5 @@
-#include "MVCAMStream.hpp"
+#include "MVCAMThread.hpp"
 
-void MVCAMStream::run() {
+void MVCAMThread::run() {
     //
 }
