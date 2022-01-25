@@ -9,6 +9,8 @@
 
 #include <QThread>
 
+#include "MVCAMDescription.hpp"
+
 typedef struct _WIDTH_HEIGHT {
 	int     display_width;
 	int     display_height;
@@ -56,10 +58,8 @@ public:
     static const QJsonObject GetStreamTypes(){ return {}; };
 
 public slots:
-    void HandleEvent(const QJsonObject& event);
+    void HandleEvent(const QJsonObject& event) override;
 
-signals:
-    void SendEvent(const QJsonObject& event);
 
 protected:
     QThread* thread;// need a better way to manage stream threads

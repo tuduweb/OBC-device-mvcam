@@ -4,7 +4,7 @@
 #include <QStyledItemDelegate>
 
 MVCAMFullSettingsWidget::MVCAMFullSettingsWidget(QWidget* parent)
-	: QWidget(parent)
+	: SettingsBaseWidget(parent)
 {
     ui = new Ui::MVCAMFullSettingsWidget();
 	ui->setupUi(this);
@@ -31,13 +31,11 @@ MVCAMFullSettingsWidget::MVCAMFullSettingsWidget(QWidget* parent)
 }
 
 MVCAMFullSettingsWidget::~MVCAMFullSettingsWidget() {
-    //
+    qDebug() << "~~~~~~~MVCAMFullSettingsWidget";
 }
 
 void MVCAMFullSettingsWidget::HandleEvent(const QJsonObject& event) {
     
-
-
     if(event.contains("type") && event["type"] == "view") {
         
         if(event.contains("id")) {

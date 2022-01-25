@@ -10,7 +10,7 @@ int                     g_hCamera = -1;     //设备句柄
 
 
 MVCAMStream::MVCAMStream() : thread(new QThread) {
-    //qDebug() << QThread::currentThread();
+    qDebug() << QThread::currentThread();
     //moveToThread(thread);
     //qDebug() << QThread::currentThread();
 }
@@ -299,6 +299,29 @@ void MVCAMStream::HandleEvent(const QJsonObject& event) {
 			}else{
 				CameraSetMirror(g_hCamera, MIRROR_DIRECTION_HORIZONTAL, false);
 			}
+
+		}else if(event["id"] == "horizontalSlider_gain_r") {
+
+			int RPos, GPos, BPos;
+			CameraGetGain(g_hCamera, &RPos, &GPos, &BPos);
+			CameraSetGain(g_hCamera, event["data"].toInt(), GPos, BPos);
+
+		}else if(event["id"] == "horizontalSlider_gain_g") {
+
+			int RPos, GPos, BPos;
+			CameraGetGain(g_hCamera, &RPos, &GPos, &BPos);
+			CameraSetGain(g_hCamera, RPos, event["data"].toInt(), BPos);
+
+		}else if(event["id"] == "horizontalSlider_gain_b") {
+
+			int RPos, GPos, BPos;
+			CameraGetGain(g_hCamera, &RPos, &GPos, &BPos);
+			CameraSetGain(g_hCamera, RPos, GPos, event["data"].toInt());
+
+		}else if(event["id"] == "horizontalSlider_saturation") {
+
+			int RPos, GPos, BPos;
+			CameraSetSaturation(g_hCamera, event["data"].toInt());
 
 		}
 
