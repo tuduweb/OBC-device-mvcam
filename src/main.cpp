@@ -14,6 +14,8 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
+#include "widgets/MVCAMFullSettingsWidget.hpp"
+
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
@@ -48,9 +50,7 @@ int main(int argc, char* argv[]) {
 
 
     MVCAMStream* stream = new MVCAMStream();
-    stream->StreamInit();
 
-    stream->StreamStart();
 
     QTimer::singleShot(1000, stream, [=](){
         qDebug() << "one shot";
@@ -66,8 +66,17 @@ int main(int argc, char* argv[]) {
     layout->addWidget(label);
 
     QObject::connect(stream, &MVCAMStream::FrameReceived, &w, [=](const QImage& image){
-        label->setPixmap(QPixmap::fromImage(image));
+        label->setPixmap(QPixmap::fromImage(image.scaled(192, 108)));
     });
+
+    MVCAMFullSettingsWidget* settingsWidget = new MVCAMFullSettingsWidget(&w);
+    layout->addWidget(settingsWidget);
+
+    QObject::connect(settingsWidget, &MVCAMFullSettingsWidget::SendEvent, stream, &MVCAMStream::HandleEvent);
+    QObject::connect(stream, &MVCAMStream::SendEvent, settingsWidget, &MVCAMFullSettingsWidget::HandleEvent);
+
+    stream->StreamInit();
+    stream->StreamStart();
 
     return app.exec();
 }

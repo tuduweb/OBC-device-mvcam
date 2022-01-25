@@ -35,12 +35,14 @@ include(./mvcamsdk/mvcamsdk.cmake)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
 file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
+file(GLOB SRC_WIDGETS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/widgets/*)
 
 set(PROJECT_SOURCES
         #resources.qrc
         src/main.cpp
         ${HEADERS}
         ${SRC_FILES}
+        ${SRC_WIDGETS_FILES}
 )
 
 add_executable(${PROJECT_NAME}
