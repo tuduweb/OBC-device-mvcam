@@ -5,6 +5,7 @@
 
 #include <QStringList>
 #include <QJsonObject>
+#include <QJsonArray>
 
 #include <QThread>
 
@@ -21,7 +22,7 @@ typedef struct _WIDTH_HEIGHT {
 class MVCAMStream : public StreamInterface{
 
     //stream type : data | video
-
+    Q_OBJECT
 public:
     MVCAMStream();
 
@@ -53,6 +54,12 @@ public:
     //Constraints relationship
     static const QStringList GetStreamLists();
     static const QJsonObject GetStreamTypes(){ return {}; };
+
+public slots:
+    void HandleEvent(const QJsonObject& event);
+
+signals:
+    void SendEvent(const QJsonObject& event);
 
 protected:
     QThread* thread;// need a better way to manage stream threads

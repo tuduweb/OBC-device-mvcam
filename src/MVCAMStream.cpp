@@ -10,9 +10,9 @@ int                     g_hCamera = -1;     //设备句柄
 
 
 MVCAMStream::MVCAMStream() : thread(new QThread) {
-    qDebug() << QThread::currentThread();
-    moveToThread(thread);
-    qDebug() << QThread::currentThread();
+    //qDebug() << QThread::currentThread();
+    //moveToThread(thread);
+    //qDebug() << QThread::currentThread();
 }
 
 #include <QTimer>
@@ -80,7 +80,7 @@ int MVCAMStream::StreamInit() {
 	g_W_H_INFO.sensor_height = pImageSizeDesc[sResolution.iIndex].iHeight;
 	g_W_H_INFO.buffer_size = g_W_H_INFO.sensor_width * g_W_H_INFO.sensor_height;
 
-
+	camera_init_WB(g_hCamera, &g_tCapability);
 
     return 0;
 }
@@ -89,7 +89,6 @@ void MVCAMStream::StartLoop() {
     qDebug() << "startLoop";
     loop(g_hCamera);
 }
-
 
 //分辨率的添加, 遍历
 int MVCAMStream::camera_init_Resolution(int hCamera, tSdkCameraCapbility* pCameraInfo) {
@@ -103,6 +102,13 @@ int MVCAMStream::camera_init_Resolution(int hCamera, tSdkCameraCapbility* pCamer
 		//ui->res_combobox->addItem(QString::fromLocal8Bit(pImageSizeDesc[i].acDescription));
 		_resolutionLists.append(QString::fromLocal8Bit(pImageSizeDesc[i].acDescription));
 	}
+
+	QJsonObject obj;
+	obj.insert("type", "view");
+	obj.insert("id", "resolution");
+	obj.insert("data", QJsonArray::fromStringList(_resolutionLists));
+
+	emit SendEvent(obj);
 
 	return 0;
 }
@@ -160,6 +166,11 @@ int MVCAMStream::camera_init_WB(int hCamera, tSdkCameraCapbility* pCameraInfo) {
 	CameraGetSaturation(hCamera, &Saturation);
     
     //manage all param from above
+	QJsonObject obj;
+	obj.insert("type", "view");
+	obj.insert("id", "rgbs");
+	obj.insert("data", QJsonArray{ RPos, GPos, BPos, Saturation});
+	emit SendEvent(obj);
 
     return 0;
 
@@ -207,10 +218,11 @@ int MVCAMStream::loop(int g_hCamera) {
 	tSdkFrameHead           g_tFrameHead;       //图像帧头信息
 	unsigned char*          g_pRawBuffer = NULL;     //raw数据
 
+	int cnt = 0;
 
     while(1) {
-
-        qDebug() << "mvcam thread : " << QThread::currentThread();
+		cnt++;
+        if(cnt % 50 == 0) qDebug() << "mvcam thread : " << QThread::currentThread();
         if(!pause_status) {
 
             if(quit_status) break;
@@ -245,5 +257,51 @@ int MVCAMStream::loop(int g_hCamera) {
     }
 
     return 0;
+
+}
+
+
+void MVCAMStream::HandleEvent(const QJsonObject& event) {
+
+	if(!event.contains("data")) {
+		qDebug() << "none data";
+	}
+	
+	qDebug() << sender() << event;
+
+	if(event.contains("id")) {
+
+		if(event["id"] == "WB") {
+					
+			int RPos, GPos, BPos;
+			CameraSetOnceWB(g_hCamera);
+			CameraGetGain(g_hCamera, &RPos, &GPos, &BPos);
+
+			QJsonObject obj;
+			obj.insert("type", "view");
+			obj.insert("id", "WB");
+			obj.insert("data", QJsonArray{ RPos, GPos, BPos});
+
+			emit SendEvent(obj);
+
+		}else if(event["id"] == "flipv") {
+			
+			if (event["data"].toBool()) {
+				CameraSetMirror(g_hCamera, MIRROR_DIRECTION_VERTICAL, true);
+			}else{
+				CameraSetMirror(g_hCamera, MIRROR_DIRECTION_VERTICAL, false);
+			}
+
+		}else if(event["id"] == "fliph") {
+
+			if (event["data"].toBool()) {
+				CameraSetMirror(g_hCamera, MIRROR_DIRECTION_HORIZONTAL, true);
+			}else{
+				CameraSetMirror(g_hCamera, MIRROR_DIRECTION_HORIZONTAL, false);
+			}
+
+		}
+
+	}
 
 }
