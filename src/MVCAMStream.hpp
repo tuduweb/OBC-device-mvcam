@@ -31,6 +31,8 @@ public:
     int StreamInit() override;
     int StreamStart() override;
 
+    QStringList getStreamLists() override;
+
     int loop(int hCamera);
 
     int setPause() { pause_status = true; return 0; };

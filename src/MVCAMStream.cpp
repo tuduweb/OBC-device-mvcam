@@ -181,6 +181,10 @@ int MVCAMStream::StreamStart() {
     return 0;
 }
 
+QStringList MVCAMStream::getStreamLists() {
+	return GetStreamLists();
+}
+
 void MVCAMStream::run() {
     loop(g_hCamera);
     exec();

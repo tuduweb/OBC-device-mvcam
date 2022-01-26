@@ -91,7 +91,10 @@ int main(int argc, char* argv[]) {
 #if 1
     MVCAMDevice* mvcam = new MVCAMDevice();
 
+    layout2->addWidget(mvcam->controlWidget());
+
     layout2->addWidget(mvcam->settingsWidget());
+
 
     QObject::connect(mvcam->stream, &MVCAMStream::FrameReceived, &w, [=](const QImage& image){
         label->setPixmap(QPixmap::fromImage(image.scaled(192, 108)));
