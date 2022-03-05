@@ -15,18 +15,21 @@ MVCAMDevice::MVCAMDevice() : _settingsWidget(nullptr), _controlWidget(nullptr) {
     streamInstances.push_back(stream);
 
 
-    _controlWidget = new MVCAMFullSettingsWidget();
     _settingsWidget = new MVCAMStreamWidget();//TODO: maybe need add property deviceName -> load settings for .. so, we need static function for generate device interface
 
-    connect(_controlWidget, &SettingsBaseWidget::SendEvent, stream, &StreamInterface::HandleEvent);
-    connect(stream, &StreamInterface::SendEvent, _controlWidget, &SettingsBaseWidget::HandleEvent);
 
 }
 
 int MVCAMDevice::DeviceInit() {
+    
     for(int i = 0; i < streamInstances.size(); ++i) {
         streamInstances[i]->StreamInit();
     }
+
+    _controlWidget = new MVCAMFullSettingsWidget();
+    connect(_controlWidget, &SettingsBaseWidget::SendEvent, stream, &StreamInterface::HandleEvent);
+    connect(stream, &StreamInterface::SendEvent, _controlWidget, &SettingsBaseWidget::HandleEvent);
+
     return 0;
 }
 

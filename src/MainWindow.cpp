@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), mvcam(nullptr), l
     setupUi(this);
 
     device_cb->addItem("MVCAM Test #1");
-    device_cb->addItem("MVCAM Test #1");
+    device_cb->addItem("MVCAM Test #2");
 
 
     QVBoxLayout* layout = new QVBoxLayout;
@@ -43,7 +43,6 @@ void MainWindow::on_btn_1_clicked()
 
 void MainWindow::on_btn_2_clicked()
 {
-    centralwidget->layout()->addWidget(mvcam->controlWidget());
 
     QObject::connect(mvcam->stream, &MVCAMStream::FrameReceived, this, [=](const QImage& image){
         label->setPixmap(QPixmap::fromImage(image.scaled(192, 108)));
@@ -51,4 +50,8 @@ void MainWindow::on_btn_2_clicked()
 
     mvcam->DeviceInit();
     mvcam->DeviceStart();
+
+    //first create controlWidget then can add it
+    centralwidget->layout()->addWidget(mvcam->controlWidget());
+
 }
