@@ -5,7 +5,11 @@
 #include "widgets/MVCAMFullSettingsWidget.hpp"
 
 MVCAMDevice::MVCAMDevice() : _settingsWidget(nullptr), _controlWidget(nullptr) {
-    
+
+    //load device config from device name
+
+
+    //    
 
     stream = new MVCAMStream();
     streamInstances.push_back(stream);
@@ -38,6 +42,15 @@ int MVCAMDevice::DeviceDeinit() {
     return 0;
 
 }
+
+
+QWidget* MVCAMDevice::MakeSettingsWidget()
+{
+    QWidget* widget = new MVCAMStreamWidget();
+    return widget;
+}
+
+
 
  QStringList MVCAMDevice::GetDeviceLists() {
     return MVCAMStream::GetStreamLists();

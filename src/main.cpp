@@ -13,102 +13,82 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QComboBox>
 
 #include "widgets/MVCAMFullSettingsWidget.hpp"
 
 #include "MVCAMDevice.hpp"
 
+#include "MainWindow.hpp"
+
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
-
-    // std::cout << "hello world" << std::endl;
-
-    // std::cout << "res: " << CameraSdkInit(0) << std::endl;
-    
-    // std::cout << "hello world" << std::endl;
-
-    // int                     iCameraCounts = 4;
-	// int                     iStatus = -1;
-	// tSdkCameraDevInfo       tCameraEnumList[4];
-
-    // QStringList lists;
-
-	// //枚举设备，并建立设备列表
-	// CameraEnumerateDevice(tCameraEnumList, &iCameraCounts);
-
-	// if (iCameraCounts <= 0)
-	// 	return 0;
-
-	// for (int i = 0; i < iCameraCounts; ++i) {
-	// 	lists.append(
-	// 		QString("%1@@%2@@%3").arg(tCameraEnumList[i].acProductName)
-	// 		.arg(tCameraEnumList[i].acDriverVersion)
-	// 		.arg(tCameraEnumList[i].acSn)
-	// 	);
-	// }
-
-    // qDebug() << lists;
-
-    QWidget w;
-    w.resize(500,400);
-    QVBoxLayout* layout = new QVBoxLayout;
-    w.setLayout(layout);
+    MainWindow w;
     w.show();
 
-    QLabel* label = new QLabel("image");
-    layout->addWidget(label);
+//     QWidget w;
+//     w.resize(500,400);
+//     QVBoxLayout* layout = new QVBoxLayout;
+//     w.setLayout(layout);
+//     w.show();
 
-    QWidget* testWidget = new QWidget(&w);
-    testWidget->resize(200, 300);
-    QVBoxLayout* layout2 = new QVBoxLayout;
-    testWidget->setLayout(layout2);
-
-    layout->addWidget(testWidget);
-
-#if 0
-    StreamInterface* stream = new MVCAMStream();
+    
 
 
-    // QTimer::singleShot(1000, stream, [=](){
-    //     qDebug() << "one shot";
-    // });
+//     QLabel* label = new QLabel("image");
+//     layout->addWidget(label);
 
-    QObject::connect(stream, &StreamInterface::FrameReceived, &w, [=](const QImage& image){
-        label->setPixmap(QPixmap::fromImage(image.scaled(192, 108)));
-    });
+//     QWidget* testWidget = new QWidget(&w);
+//     testWidget->resize(200, 300);
+//     QVBoxLayout* layout2 = new QVBoxLayout;
+//     testWidget->setLayout(layout2);
 
-    SettingsBaseWidget* settingsWidget = new MVCAMFullSettingsWidget();
-    layout->addWidget(settingsWidget);
+//     layout->addWidget(testWidget);
 
-    QObject::connect(settingsWidget, &SettingsBaseWidget::SendEvent, stream, &StreamInterface::HandleEvent);
-    QObject::connect(qobject_cast<MVCAMStream*>(stream), &MVCAMStream::SendEvent, settingsWidget, &SettingsBaseWidget::HandleEvent);
-
-    stream->StreamInit();
-    stream->StreamStart();
-#endif
-
-#if 1
-    MVCAMDevice* mvcam = new MVCAMDevice();
-
-    layout2->addWidget(mvcam->controlWidget());
-
-    layout2->addWidget(mvcam->settingsWidget());
+// #if 0
+//     StreamInterface* stream = new MVCAMStream();
 
 
-    QObject::connect(mvcam->stream, &MVCAMStream::FrameReceived, &w, [=](const QImage& image){
-        label->setPixmap(QPixmap::fromImage(image.scaled(192, 108)));
-    });
+//     // QTimer::singleShot(1000, stream, [=](){
+//     //     qDebug() << "one shot";
+//     // });
 
-    mvcam->DeviceInit();
-    mvcam->DeviceStart();
+//     QObject::connect(stream, &StreamInterface::FrameReceived, &w, [=](const QImage& image){
+//         label->setPixmap(QPixmap::fromImage(image.scaled(192, 108)));
+//     });
 
-    QTimer::singleShot(10000, &w, [=](){
-        qDebug() << "one shot";
-        // delete testWidget;
-        // //one shot
-        // //~~~~~~~MVCAMFullSettingsWidget
-    });
-#endif
+//     SettingsBaseWidget* settingsWidget = new MVCAMFullSettingsWidget();
+//     layout->addWidget(settingsWidget);
+
+//     QObject::connect(settingsWidget, &SettingsBaseWidget::SendEvent, stream, &StreamInterface::HandleEvent);
+//     QObject::connect(qobject_cast<MVCAMStream*>(stream), &MVCAMStream::SendEvent, settingsWidget, &SettingsBaseWidget::HandleEvent);
+
+//     stream->StreamInit();
+//     stream->StreamStart();
+// #endif
+
+// #if 1
+//     MVCAMDevice* mvcam = new MVCAMDevice();
+
+//     layout2->addWidget(mvcam->controlWidget());
+
+//     layout2->addWidget(mvcam->settingsWidget());
+
+
+//     QObject::connect(mvcam->stream, &MVCAMStream::FrameReceived, &w, [=](const QImage& image){
+//         label->setPixmap(QPixmap::fromImage(image.scaled(192, 108)));
+//     });
+
+//     mvcam->DeviceInit();
+//     mvcam->DeviceStart();
+
+//     QTimer::singleShot(10000, &w, [=](){
+//         qDebug() << "one shot";
+//         // delete testWidget;
+//         // //one shot
+//         // //~~~~~~~MVCAMFullSettingsWidget
+//     });
+// #endif
     return app.exec();
 }

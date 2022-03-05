@@ -22,6 +22,8 @@ public:
     QWidget* controlWidget() const { return _controlWidget; };
     QWidget* settingsWidget() const { return _settingsWidget; }
 
+    static QWidget* MakeSettingsWidget();
+
 
     static QStringList GetDeviceLists();
 
@@ -32,6 +34,8 @@ signals:
 public:
     QVector<StreamInterface*> streamInstances;
     
+    QJsonObject _deviceConfig;
+
 protected:
     SettingsBaseWidget* _controlWidget;//控制面板 是在打开摄像头后的面板
     MVCAMStreamWidget* _settingsWidget;//设置面板 是在打开摄像头前的设置面板 //TODO: 类型名字更改
