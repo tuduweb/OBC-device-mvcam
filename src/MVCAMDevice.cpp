@@ -6,15 +6,17 @@
 
 MVCAMDevice::MVCAMDevice() : _settingsWidget(nullptr), _controlWidget(nullptr) {
     
-    _controlWidget = new MVCAMFullSettingsWidget();
 
     stream = new MVCAMStream();
     streamInstances.push_back(stream);
 
+
+    _controlWidget = new MVCAMFullSettingsWidget();
+    _settingsWidget = new MVCAMStreamWidget();//TODO: maybe need add property deviceName -> load settings for .. so, we need static function for generate device interface
+
     connect(_controlWidget, &SettingsBaseWidget::SendEvent, stream, &StreamInterface::HandleEvent);
     connect(stream, &StreamInterface::SendEvent, _controlWidget, &SettingsBaseWidget::HandleEvent);
 
-    _settingsWidget = new MVCAMStreamWidget();
 }
 
 int MVCAMDevice::DeviceInit() {
@@ -30,3 +32,13 @@ int MVCAMDevice::DeviceStart() {
     }
     return 0;
 }
+
+int MVCAMDevice::DeviceDeinit() {
+    
+    return 0;
+
+}
+
+ QStringList MVCAMDevice::GetDeviceLists() {
+    return MVCAMStream::GetStreamLists();
+ }

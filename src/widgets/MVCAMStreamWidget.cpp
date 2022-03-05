@@ -1,5 +1,7 @@
 #include "MVCAMStreamWidget.hpp"
 
+#include "MVCAMDevice.hpp"
+
 
 MVCAMStreamWidget::MVCAMStreamWidget(QWidget* parent)
 	: QWidget(parent)
@@ -15,8 +17,8 @@ MVCAMStreamWidget::~MVCAMStreamWidget()
 
 void MVCAMStreamWidget::ReloadUI()
 {
-	QStringList deviceLists;
-	int count = 0;//MVCAMRemoteStream::GetDeviceLists(deviceLists);
+	QStringList deviceLists = MVCAMDevice::GetDeviceLists();
+	int count = deviceLists.size();
 
 	deviceComboBox->clear();
 

@@ -105,9 +105,9 @@ int main(int argc, char* argv[]) {
 
     QTimer::singleShot(10000, &w, [=](){
         qDebug() << "one shot";
-        delete testWidget;
-        //one shot
-        //~~~~~~~MVCAMFullSettingsWidget
+        // delete testWidget;
+        // //one shot
+        // //~~~~~~~MVCAMFullSettingsWidget
     });
 #endif
     return app.exec();
