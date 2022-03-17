@@ -52,6 +52,7 @@ add_executable(${PROJECT_NAME}
 add_library(obc_baselib STATIC
 )
 
+# copy the dependencies
 if(APPLE)
     add_custom_command(TARGET ${PROJECT_NAME}
         POST_BUILD
@@ -63,7 +64,7 @@ if(APPLE)
         COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @executable_path/../Frameworks/libmvsdk.dylib ${mvcamsdk_libs_DIR}/libmvsdk.dylib $<TARGET_FILE:${PROJECT_NAME}>)
 endif()
 
-message(${CMAKE_INSTALL_NAME_TOOL})
+#message(${CMAKE_INSTALL_NAME_TOOL})
 
 target_link_libraries(obc_baselib
     PUBLIC Qt${QT_VERSION_MAJOR}::Core
@@ -73,12 +74,8 @@ target_link_libraries(obc_baselib
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC obc_baselib
-    libmvsdk
+    mvcam_lib
 )
-
-
-# add_library()
-# add_executable()
 
 option(IS_BUILD_PLUGIN_EXAMPLES "build examples" ON)
 
